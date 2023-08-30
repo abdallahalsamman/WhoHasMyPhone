@@ -1,0 +1,31 @@
+# Gradle generated files
+.gradle/
+build/
+
+# IntelliJ IDEA files
+.idea/
+
+# Compiled binary files and libraries
+*.class
+*.jar
+*.war
+*.ear
+*.apk
+
+# Gradle wrapper files
+gradle/wrapper/gradle-wrapper.jar
+gradle/wrapper/gradle-wrapper.properties
+
+# Generated Android Studio files
+*.iml
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/misc.xml
+
+# Mac OSX specific files
+.DS_Store
+
+# Thumbnails
+thumbs.db
+# Compiled application files
+app/build/

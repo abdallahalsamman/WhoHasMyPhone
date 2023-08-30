@@ -1,0 +1,1 @@
+/home/user/Downloads/FaceRecognitionApp-1.2.3/app/build/intermediates/ndkBuild/debug/obj/local/arm64-v8a

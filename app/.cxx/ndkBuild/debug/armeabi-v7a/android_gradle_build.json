@@ -1,0 +1,70 @@
+{
+  "buildFiles": [
+    "/home/user/Downloads/FaceRecognitionApp-1.2.3/app/src/main/cpp/Android.mk",
+    "/home/user/Downloads/FaceRecognitionApp-1.2.3/app/src/main/cpp/Application.mk"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/home/user/Android/Sdk/ndk/21.4.7075529/ndk-build",
+      "NDK_PROJECT_PATH\u003dnull",
+      "APP_BUILD_SCRIPT\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/src/main/cpp/Android.mk",
+      "NDK_APPLICATION_MK\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/src/main/cpp/Application.mk",
+      "APP_ABI\u003darmeabi-v7a",
+      "NDK_ALL_ABIS\u003darmeabi-v7a",
+      "NDK_DEBUG\u003d1",
+      "APP_PLATFORM\u003dandroid-16",
+      "NDK_OUT\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/build/intermediates/ndkBuild/debug/obj",
+      "NDK_LIBS_OUT\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/build/intermediates/ndkBuild/debug/lib",
+      "NDK_DEBUG\u003d1",
+      "NDEBUG\u003dnull",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/home/user/Android/Sdk/ndk/21.4.7075529/ndk-build",
+    "NDK_PROJECT_PATH\u003dnull",
+    "APP_BUILD_SCRIPT\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/src/main/cpp/Android.mk",
+    "NDK_APPLICATION_MK\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/src/main/cpp/Application.mk",
+    "APP_ABI\u003darmeabi-v7a",
+    "NDK_ALL_ABIS\u003darmeabi-v7a",
+    "NDK_DEBUG\u003d1",
+    "APP_PLATFORM\u003dandroid-16",
+    "NDK_OUT\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/build/intermediates/ndkBuild/debug/obj",
+    "NDK_LIBS_OUT\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/build/intermediates/ndkBuild/debug/lib",
+    "NDK_DEBUG\u003d1",
+    "NDEBUG\u003dnull",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "face-lib-debug-armeabi-v7a": {
+      "buildCommandComponents": [
+        "/home/user/Android/Sdk/ndk/21.4.7075529/ndk-build",
+        "NDK_PROJECT_PATH\u003dnull",
+        "APP_BUILD_SCRIPT\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/src/main/cpp/Android.mk",
+        "NDK_APPLICATION_MK\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/src/main/cpp/Application.mk",
+        "APP_ABI\u003darmeabi-v7a",
+        "NDK_ALL_ABIS\u003darmeabi-v7a",
+        "NDK_DEBUG\u003d1",
+        "APP_PLATFORM\u003dandroid-16",
+        "NDK_OUT\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/build/intermediates/ndkBuild/debug/obj",
+        "NDK_LIBS_OUT\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/build/intermediates/ndkBuild/debug/lib",
+        "NDK_DEBUG\u003d1",
+        "NDEBUG\u003dnull",
+        "/home/user/Downloads/FaceRecognitionApp-1.2.3/app/build/intermediates/ndkBuild/debug/obj/local/armeabi-v7a/libface-lib.so"
+      ],
+      "toolchain": "toolchain-armeabi-v7a",
+      "abi": "armeabi-v7a",
+      "artifactName": "face-lib",
+      "output": "/home/user/Downloads/FaceRecognitionApp-1.2.3/app/build/intermediates/ndkBuild/debug/obj/local/armeabi-v7a/libface-lib.so"
+    }
+  },
+  "toolchains": {
+    "toolchain-armeabi-v7a": {
+      "cppCompilerExecutable": "/home/user/Android/Sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++"
+    }
+  },
+  "cFileExtensions": [],
+  "cppFileExtensions": [
+    "cpp"
+  ]
+}
