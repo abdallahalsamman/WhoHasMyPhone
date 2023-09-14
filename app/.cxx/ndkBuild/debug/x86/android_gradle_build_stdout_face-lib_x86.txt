@@ -1,8 +1,1 @@
-[x86] Compile++      : face-lib <= face-lib.cpp
-[x86] Compile++      : face-lib <= Facebase.cpp
-[x86] Compile++      : face-lib <= Eigenfaces.cpp
-[x86] Compile++      : face-lib <= Fisherfaces.cpp
-[x86] Compile++      : face-lib <= PCA.cpp
-[x86] Compile++      : face-lib <= LDA.cpp
-[x86] Prebuilt       : libopencv_java3.so <= /home/user/Downloads/FaceRecognitionApp-1.2.3/app/src/main/cpp/../../../../OpenCV-android-sdk/sdk/native/jni/../libs/x86/
-[x86] SharedLibrary  : libface-lib.so
+make: Nothing to be done for 'face-lib'.

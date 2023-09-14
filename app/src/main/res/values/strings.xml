@@ -10,4 +10,8 @@
     <string name="maximum_images">Maximum number of images:</string>
     <string name="clear_button">Clear training set</string>
     <string name="flip">Flip</string>
+    <string name="error_cannot_open">Failed Opening Camera</string>
+    <string name="error_cannot_get_permission">No Camera Permission</string>
+    <string name="error_not_having_camera">No Front Camera</string>
+    <string name="error_cannot_write">Image write failed</string>
 </resources>

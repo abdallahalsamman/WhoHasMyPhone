@@ -22,6 +22,7 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
@@ -29,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -58,6 +60,10 @@ import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.androidhiddencamera.CameraConfig;
+import com.androidhiddencamera.HiddenCameraUtils;
+import com.androidhiddencamera.config.*;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
@@ -135,12 +141,10 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
         // Train the face recognition algorithms in an asynchronous task, so we do not skip any frames
         if (useEigenfaces) {
             Log.i(TAG, "Training Eigenfaces");
-            showToast("Training " + getResources().getString(R.string.eigenfaces), Toast.LENGTH_SHORT);
 
             mTrainFacesTask = new NativeMethods.TrainFacesTask(imagesMatrix, trainFacesTaskCallback);
         } else {
             Log.i(TAG, "Training Fisherfaces");
-            showToast("Training " + getResources().getString(R.string.fisherfaces), Toast.LENGTH_SHORT);
 
             Set<String> uniqueLabelsSet = new HashSet<>(imagesLabels); // Get all unique labels
             uniqueLabels = uniqueLabelsSet.toArray(new String[uniqueLabelsSet.size()]); // Convert to String array, so we can read the values from the indices
@@ -282,6 +286,10 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                .permitAll().build();
+        StrictMode.setThreadPolicy(policy);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -437,6 +445,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
         });
 
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.camera_java_surface_view);
+
         mOpenCvCameraView.setCameraIndex(prefs.getInt("mCameraIndex", CameraBridgeViewBase.CAMERA_ID_FRONT));
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
@@ -504,6 +513,8 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
         super.onPause();
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
+
+        startService(new Intent(FaceRecognitionAppActivity.this, BackgroundService.class));
     }
 
     @Override
@@ -541,6 +552,8 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
     @Override
     public void onResume() {
         super.onResume();
+
+        stopService(new Intent(FaceRecognitionAppActivity.this, BackgroundService.class));
 
         // Request permission if needed
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED/* || ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED*/)
