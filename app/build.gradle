@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 33
     defaultConfig {
-        applicationId 'com.lauszus.facerecognitionapp'
+        applicationId 'com.abdallahalsamman.kidhasphonealert'
         minSdkVersion 16
-        targetSdkVersion 28
-        versionCode 6
+        targetSdkVersion 33
+        versionCode 8
         versionName '1.2.3'
         vectorDrawables.useSupportLibrary = true
         ndk {

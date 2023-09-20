@@ -49,7 +49,7 @@ using namespace Eigen;
 extern "C" {
 #endif
 
-JNIEXPORT void JNICALL Java_com_lauszus_facerecognitionapp_NativeMethods_TrainFaces(JNIEnv, jobject, jlong addrImages, jlong addrClasses) {
+JNIEXPORT void JNICALL Java_com_abdallahalsamman_kidhasphonealert_NativeMethods_TrainFaces(JNIEnv, jobject, jlong addrImages, jlong addrClasses) {
     Mat *pImages = (Mat *) addrImages; // Each images is represented as a column vector
     Mat *pClasses = (Mat *) addrClasses; // Classes are represented as a vector
 
@@ -83,7 +83,7 @@ JNIEXPORT void JNICALL Java_com_lauszus_facerecognitionapp_NativeMethods_TrainFa
     */
 }
 
-JNIEXPORT void JNICALL Java_com_lauszus_facerecognitionapp_NativeMethods_MeasureDist(JNIEnv *env, jobject, jlong addrImage, jfloatArray minDist, jintArray minDistIndex, jfloatArray faceDist, jboolean useEigenfaces) {
+JNIEXPORT void JNICALL Java_com_abdallahalsamman_kidhasphonealert_NativeMethods_MeasureDist(JNIEnv *env, jobject, jlong addrImage, jfloatArray minDist, jintArray minDistIndex, jfloatArray faceDist, jboolean useEigenfaces) {
     Facebase *pFacebase;
     if (useEigenfaces) {
         LOGI("Using Eigenfaces");
@@ -152,14 +152,14 @@ static void convertYUVImageToRGBA(const Mat *pYUV, Mat *pRGB) {
     }
 }
 
-JNIEXPORT void JNICALL Java_com_lauszus_facerecognitionapp_NativeMethods_YUV2RGB(JNIEnv, jobject, jlong addrYuv, jlong addrRgba) {
+JNIEXPORT void JNICALL Java_com_abdallahalsamman_kidhasphonealert_NativeMethods_YUV2RGB(JNIEnv, jobject, jlong addrYuv, jlong addrRgba) {
     Mat *pYUV = (Mat *) addrYuv; // YUV 4:2:0 planar image, with 8 bit Y samples, followed by interleaved V/U plane with 8bit 2x2 sub-sampled chroma samples
     Mat *pRGB = (Mat *) addrRgba; // RGBA image
 
     convertYUVImageToRGBA(pYUV, pRGB);
 }
 
-JNIEXPORT void JNICALL Java_com_lauszus_facerecognitionapp_NativeMethods_HistEQ(JNIEnv, jobject, jlong addrYuv, jlong addrRgba) {
+JNIEXPORT void JNICALL Java_com_abdallahalsamman_kidhasphonealert_NativeMethods_HistEQ(JNIEnv, jobject, jlong addrYuv, jlong addrRgba) {
     Mat *pYUV = (Mat *) addrYuv; // YUV 4:2:0 planar image, with 8 bit Y samples, followed by interleaved V/U plane with 8bit 2x2 sub-sampled chroma samples
     Mat *pRGB = (Mat *) addrRgba; // RGBA image
 

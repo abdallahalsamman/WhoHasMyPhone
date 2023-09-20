@@ -1,0 +1,55 @@
+{
+  "buildFiles": [
+    "/home/user/Downloads/FaceRecognitionApp-1.2.3/app/src/main/cpp/Android.mk",
+    "/home/user/Downloads/FaceRecognitionApp-1.2.3/app/src/main/cpp/Application.mk"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/home/user/Android/Sdk/ndk/21.4.7075529/ndk-build",
+      "NDK_PROJECT_PATH\u003dnull",
+      "APP_BUILD_SCRIPT\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/src/main/cpp/Android.mk",
+      "NDK_APPLICATION_MK\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/src/main/cpp/Application.mk",
+      "APP_ABI\u003dx86_64",
+      "NDK_ALL_ABIS\u003dx86_64",
+      "NDK_DEBUG\u003d0",
+      "APP_PLATFORM\u003dandroid-16",
+      "NDK_OUT\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/build/intermediates/ndkBuild/release/obj",
+      "NDK_LIBS_OUT\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/build/intermediates/ndkBuild/release/lib",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/home/user/Android/Sdk/ndk/21.4.7075529/ndk-build",
+    "NDK_PROJECT_PATH\u003dnull",
+    "APP_BUILD_SCRIPT\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/src/main/cpp/Android.mk",
+    "NDK_APPLICATION_MK\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/src/main/cpp/Application.mk",
+    "APP_ABI\u003dx86_64",
+    "NDK_ALL_ABIS\u003dx86_64",
+    "NDK_DEBUG\u003d0",
+    "APP_PLATFORM\u003dandroid-16",
+    "NDK_OUT\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/build/intermediates/ndkBuild/release/obj",
+    "NDK_LIBS_OUT\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/build/intermediates/ndkBuild/release/lib",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "face-lib-release-x86_64": {
+      "artifactName": "face-lib",
+      "buildCommandComponents": [
+        "/home/user/Android/Sdk/ndk/21.4.7075529/ndk-build",
+        "NDK_PROJECT_PATH\u003dnull",
+        "APP_BUILD_SCRIPT\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/src/main/cpp/Android.mk",
+        "NDK_APPLICATION_MK\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/src/main/cpp/Application.mk",
+        "APP_ABI\u003dx86_64",
+        "NDK_ALL_ABIS\u003dx86_64",
+        "NDK_DEBUG\u003d0",
+        "APP_PLATFORM\u003dandroid-16",
+        "NDK_OUT\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/build/intermediates/ndkBuild/release/obj",
+        "NDK_LIBS_OUT\u003d/home/user/Downloads/FaceRecognitionApp-1.2.3/app/build/intermediates/ndkBuild/release/lib",
+        "/home/user/Downloads/FaceRecognitionApp-1.2.3/app/build/intermediates/ndkBuild/release/obj/local/x86_64/libface-lib.so"
+      ],
+      "abi": "x86_64",
+      "output": "/home/user/Downloads/FaceRecognitionApp-1.2.3/app/build/intermediates/ndkBuild/release/obj/local/x86_64/libface-lib.so",
+      "runtimeFiles": []
+    }
+  }
+}

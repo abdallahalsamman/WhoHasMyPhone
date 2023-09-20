@@ -58,7 +58,7 @@
 
                 </RadioGroup>
 
-                <com.lauszus.facerecognitionapp.SeekBarArrows
+                <com.abdallahalsamman.kidhasphonealert.SeekBarArrows
                     android:id="@+id/threshold_face"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -66,7 +66,7 @@
                     SeekBarArrows:max=".5"
                     SeekBarArrows:n_values="500" />
 
-                <com.lauszus.facerecognitionapp.SeekBarArrows
+                <com.abdallahalsamman.kidhasphonealert.SeekBarArrows
                     android:id="@+id/threshold_distance"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -74,7 +74,7 @@
                     SeekBarArrows:max=".5"
                     SeekBarArrows:n_values="500" />
 
-                <com.lauszus.facerecognitionapp.SeekBarArrows
+                <com.abdallahalsamman.kidhasphonealert.SeekBarArrows
                     android:id="@+id/maximum_images"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

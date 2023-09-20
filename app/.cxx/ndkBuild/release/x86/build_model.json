@@ -1,25 +1,22 @@
 {
-  "abi": "ARM64_V8A",
+  "abi": "X86",
   "info": {
-    "abi": "ARM64_V8A",
-    "bitness": 64,
+    "abi": "X86",
+    "bitness": 32,
     "deprecated": false,
     "default": true
   },
-  "originalCxxBuildFolder": "/home/user/Downloads/FaceRecognitionApp-1.2.3/app/.cxx/ndkBuild/debug/arm64-v8a",
-  "cxxBuildFolder": "/home/user/Downloads/FaceRecognitionApp-1.2.3/app/.cxx/ndkBuild/debug/arm64-v8a",
+  "originalCxxBuildFolder": "/home/user/Downloads/FaceRecognitionApp-1.2.3/app/.cxx/ndkBuild/release/x86",
+  "cxxBuildFolder": "/home/user/Downloads/FaceRecognitionApp-1.2.3/app/.cxx/ndkBuild/release/x86",
   "abiPlatformVersion": 16,
   "variant": {
-    "buildSystemArgumentList": [
-      "NDK_DEBUG\u003d1",
-      "NDEBUG\u003dnull"
-    ],
+    "buildSystemArgumentList": [],
     "cFlagsList": [],
     "cppFlagsList": [],
-    "variantName": "debug",
-    "objFolder": "/home/user/Downloads/FaceRecognitionApp-1.2.3/app/build/intermediates/ndkBuild/debug/obj/local",
-    "soFolder": "/home/user/Downloads/FaceRecognitionApp-1.2.3/app/build/intermediates/ndkBuild/debug/lib",
-    "isDebuggableEnabled": true,
+    "variantName": "release",
+    "objFolder": "/home/user/Downloads/FaceRecognitionApp-1.2.3/app/build/intermediates/ndkBuild/release/obj/local",
+    "soFolder": "/home/user/Downloads/FaceRecognitionApp-1.2.3/app/build/intermediates/ndkBuild/release/lib",
+    "isDebuggableEnabled": false,
     "validAbiList": [
       "ARMEABI_V7A",
       "ARM64_V8A",
@@ -132,10 +129,10 @@
       },
       "nativeBuildOutputLevel": "QUIET"
     },
-    "prefabDirectory": "/home/user/Downloads/FaceRecognitionApp-1.2.3/app/.cxx/ndkBuild/debug/prefab"
+    "prefabDirectory": "/home/user/Downloads/FaceRecognitionApp-1.2.3/app/.cxx/ndkBuild/release/prefab"
   },
   "buildSettings": {
     "environmentVariables": []
   },
-  "prefabFolder": "/home/user/Downloads/FaceRecognitionApp-1.2.3/app/.cxx/ndkBuild/debug/prefab/arm64-v8a"
+  "prefabFolder": "/home/user/Downloads/FaceRecognitionApp-1.2.3/app/.cxx/ndkBuild/release/prefab/x86"
 }

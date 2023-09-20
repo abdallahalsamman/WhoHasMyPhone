@@ -7,7 +7,7 @@
     android:fitsSystemWindows="true"
     tools:context=".FaceRecognitionAppActivity">
 
-    <com.lauszus.facerecognitionapp.JavaCameraView
+    <com.abdallahalsamman.kidhasphonealert.JavaCameraView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/camera_java_surface_view" />

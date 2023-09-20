@@ -21,6 +21,9 @@
     "soFolder": "/home/user/Downloads/FaceRecognitionApp-1.2.3/app/build/intermediates/ndkBuild/debug/lib",
     "isDebuggableEnabled": true,
     "validAbiList": [
+      "ARMEABI_V7A",
+      "ARM64_V8A",
+      "X86",
       "X86_64"
     ],
     "buildTargetSet": [],
@@ -123,7 +126,6 @@
         "sdkFolder": "/home/user/Android/Sdk",
         "isNativeCompilerSettingsCacheEnabled": false,
         "isBuildOnlyTargetAbiEnabled": true,
-        "ideBuildTargetAbi": "x86_64,x86",
         "isCmakeBuildCohabitationEnabled": false,
         "isPrefabEnabled": false,
         "isV2NativeModelEnabled": true
