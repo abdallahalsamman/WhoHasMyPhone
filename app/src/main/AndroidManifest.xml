@@ -22,7 +22,7 @@
         android:theme="@style/AppTheme">
         <service android:enabled="true" android:name=".BackgroundService"></service>
         <activity android:name=".FaceRecognitionAppActivity"
-            android:screenOrientation="fullSensor"
+            android:screenOrientation="portrait"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"
             android:exported="true">

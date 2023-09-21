@@ -237,7 +237,7 @@ public class BackgroundService extends HiddenCameraService {
 
         // Check if at least one face is detected
         if (faceDetections.toArray().length == 0) {
-            SaveImage(mGray);
+//            SaveImage(mGray);
             return;
         }
 
@@ -320,7 +320,10 @@ public class BackgroundService extends HiddenCameraService {
                         lastPerson = person;
                         Log.i("BackgroundService", "Face detected: " + person + ". Distance: " + minDistString);
 
-                        if (samePersonInaRow < 3) return;
+                        if (samePersonInaRow < 3) {
+                            takePicture();
+                            return;
+                        }
 
                         if (person.toLowerCase().startsWith("kid")) {
                             reportKid(person);
@@ -438,7 +441,7 @@ public class BackgroundService extends HiddenCameraService {
             public void run() {
                 minimizeApp();
             }
-        }, 5000L);
+        }, 10000L);
 
 
         super.onTaskRemoved(rootIntent);

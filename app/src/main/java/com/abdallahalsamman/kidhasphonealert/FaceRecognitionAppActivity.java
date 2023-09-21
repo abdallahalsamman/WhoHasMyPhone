@@ -369,6 +369,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
             public void onProgressChanged(float progress) {
                 Log.i(TAG, "Face threshold: " + mThresholdFace.progressToString(progress));
                 faceThreshold = progress;
+                savePreferences();
             }
         });
         faceThreshold = mThresholdFace.getProgress(); // Get initial value
@@ -379,6 +380,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
             public void onProgressChanged(float progress) {
                 Log.i(TAG, "Distance threshold: " + mThresholdDistance.progressToString(progress));
                 distanceThreshold = progress;
+                savePreferences();
             }
         });
         distanceThreshold = mThresholdDistance.getProgress(); // Get initial value
@@ -559,6 +561,16 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
     public void onStop() {
         super.onStop();
         // Store threshold values
+        savePreferences();
+
+        // Store ArrayLists containing the images and labels
+        if (images != null && imagesLabels != null) {
+            tinydb.putListMat("images", images);
+            tinydb.putListString("imagesLabels", imagesLabels);
+        }
+    }
+
+    private void savePreferences() {
         Editor editor = prefs.edit();
         editor.putFloat("faceThreshold", faceThreshold);
         editor.putFloat("distanceThreshold", distanceThreshold);
@@ -566,12 +578,6 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
         editor.putBoolean("useEigenfaces", useEigenfaces);
         editor.putInt("mCameraIndex", mOpenCvCameraView.mCameraIndex);
         editor.apply();
-
-        // Store ArrayLists containing the images and labels
-        if (images != null && imagesLabels != null) {
-            tinydb.putListMat("images", images);
-            tinydb.putListString("imagesLabels", imagesLabels);
-        }
     }
 
     @Override
