@@ -14,20 +14,6 @@
         android:layout_alignParentBottom="true"
         android:layout_gravity="bottom|center_horizontal"
         android:orientation="horizontal"
-        tools:ignore="UselessParent">
-
-        <Button
-            android:id="@+id/take_picture_button"
-            style="?metaButtonBarButtonStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:paddingTop="20dp"
-            android:paddingBottom="20dp"
-            android:background="@color/black_overlay"
-            android:textColor="@android:color/white"
-            android:text="@string/picture_button" />
-
-    </LinearLayout>
+        tools:ignore="UselessParent"/>
 
 </RelativeLayout>
