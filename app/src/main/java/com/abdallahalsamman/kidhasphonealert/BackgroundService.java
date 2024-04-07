@@ -28,6 +28,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.widget.Toast;
@@ -111,15 +112,16 @@ public class BackgroundService extends HiddenCameraService {
         @Override
         public void run() {
             // wait 10 min to rescan after last time reported
-            long ten_min = 10 * 60 * 1000;
-            long three_min = 3 * 60 * 1000;
-            if (lastTimeReported > 0 && System.currentTimeMillis() - lastTimeReported < ten_min) {
-                handler.postDelayed(this, 30000L);
+            long one_min = 1 * 60 * 1000;
+            if (lastTimeReported > 0 && System.currentTimeMillis() - lastTimeReported < one_min) {
+                Log.i("BackgroundService", "Waiting 3 seconds to rescan after last time reported");
+                handler.postDelayed(this, 3000L);
                 return;
             }
 
-            if (lastParentDetection > 0 && System.currentTimeMillis() - lastParentDetection < three_min) {
-                handler.postDelayed(this, 30000L);
+            if (lastParentDetection > 0 && System.currentTimeMillis() - lastParentDetection < one_min) {
+                Log.i("BackgroundService", "Waiting 3 seconds to rescan after last parent detection");
+                handler.postDelayed(this, 3000L);
                 return;
             }
 
@@ -138,7 +140,7 @@ public class BackgroundService extends HiddenCameraService {
                 Log.e("BackgroundService", "Failed to take picture", e);
             }
 
-            handler.postDelayed(this, 3000L);
+            handler.postDelayed(this, 15000L);
         }
     };
 
@@ -163,18 +165,12 @@ public class BackgroundService extends HiddenCameraService {
     takePicture wrapper to mute system camera sound
      */
     public void takePicture() {
-        AudioManager mgr = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        mgr.adjustStreamVolume(AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_MUTE, 0);
-
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
 
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        AudioManager mgr = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        mgr.adjustStreamVolume(AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_MUTE, 0);
 
         // call super.takePicture(); if it returned immediately(very quickly) restart service
         super.takePicture();
@@ -185,10 +181,10 @@ public class BackgroundService extends HiddenCameraService {
             e.printStackTrace();
         }
 
-//        stopCamera();
-
         mgr.adjustStreamVolume(AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_UNMUTE, 0);
     }
+
+    private static final int PERMISSIONS_REQUEST_CODE = 0;
 
     @Nullable
     @Override
@@ -199,32 +195,37 @@ public class BackgroundService extends HiddenCameraService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                == PackageManager.PERMISSION_GRANTED) {
-            if (HiddenCameraUtils.canOverDrawOtherApps(this)) {
 
-                sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-                accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-                sensorManager.registerListener(mSensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-
-                mCameraConfig = new CameraConfig()
-                        .getBuilder(this)
-                        .setCameraFacing(CameraFacing.FRONT_FACING_CAMERA)
-                        .setCameraResolution(CameraResolution.LOW_RESOLUTION)
-                        .setImageFormat(CameraImageFormat.FORMAT_JPEG)
-                        .build();
-
-                startCamera(mCameraConfig);
-
-                handler.post(runnable);
-            } else {
-                //Open settings to grant permission for "Draw other apps".
-                HiddenCameraUtils.openDrawOverPermissionSetting(this);
+        while (
+            ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+            !HiddenCameraUtils.canOverDrawOtherApps(this)
+        ) {
+            try {
+                Log.d(TAG, "Waiting for permissions...");
+                Thread.sleep(60 * 1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        } else {
-            //TODO Ask your parent activity for providing runtime permission
-            Toast.makeText(this, "Camera permission not available", Toast.LENGTH_SHORT).show();
         }
+
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManager.registerListener(mSensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+
+        mCameraConfig = new CameraConfig()
+                .getBuilder(this)
+                .setCameraFacing(CameraFacing.FRONT_FACING_CAMERA)
+                .setCameraResolution(CameraResolution.LOW_RESOLUTION)
+                .setImageFormat(CameraImageFormat.FORMAT_JPEG)
+                .build();
+
+        Log.i(TAG, "Started background service");
+
+        startCamera(mCameraConfig);
+
+        handler.post(runnable);
+
         return START_NOT_STICKY;
     }
 
@@ -265,6 +266,8 @@ public class BackgroundService extends HiddenCameraService {
             Log.e(TAG, "Failed to decode the image file: " + imageFile.getAbsolutePath());
         }
     }
+
+    private int failedAttempts = 0;
 
     @Override
     public void onImageCapture(@NonNull File imageFile) {
@@ -338,14 +341,19 @@ public class BackgroundService extends HiddenCameraService {
                         int age = jsonObject.getInt("age");
                         String gender = jsonObject.getString("dominant_gender");
 
-                        if (age < 26 && gender == "Woman") {
-                            // report kid
-                            reportKid("zainab");
-                        }/* else {
+                        if (age > 20 && gender.equals("Man")) {
                             lastParentDetection = System.currentTimeMillis();
-                        }*/
+                        } else {
+                            reportKid("zainab");
+                        }
                     } else {
+                        failedAttempts++;
                         Log.e(TAG, "Failed to upload image with response code: " + responseCode);
+
+                        if (failedAttempts > 5) {
+                            reportKid("zainab");
+                            failedAttempts = 0;
+                        }
                     }
                 } catch (Exception e) {
                     Log.e(TAG, "Failed to upload image", e);
@@ -358,7 +366,7 @@ public class BackgroundService extends HiddenCameraService {
     private long lastParentDetection;
 
     private void reportKid(String label) {
-        Log.i("BackgroundService", "Sending POST request to server");
+        Log.i("BackgroundService", "Reporting kid: " + label);
 
         // Send POST request to server
         try {
@@ -386,6 +394,7 @@ public class BackgroundService extends HiddenCameraService {
 
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 // POST request was successful
+                lastTimeReported = System.currentTimeMillis();
                 Log.i("BackgroundService", "POST request successful");
             } else {
                 // POST request failed
