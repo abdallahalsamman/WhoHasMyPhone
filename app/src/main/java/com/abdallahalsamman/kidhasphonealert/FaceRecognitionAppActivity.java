@@ -19,6 +19,7 @@
 package com.abdallahalsamman.kidhasphonealert;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -39,6 +40,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity  {
     private static final int PERMISSIONS_REQUEST_CODE = 0;
     private boolean first_boot = true;
     private Toast mToast;
+
 
     private void showToast(String message, int duration) {
         if (mToast != null && mToast.getView().isShown())
@@ -83,27 +85,16 @@ public class FaceRecognitionAppActivity extends AppCompatActivity  {
         }
 
 
-        if (first_boot) {
-            BootReceiver myReceiver = new BootReceiver();
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(Intent.ACTION_SCREEN_OFF);
-            filter.addAction(Intent.ACTION_SCREEN_ON);
-            filter.addAction(Intent.ACTION_USER_PRESENT);
-            filter.addAction(Intent.ACTION_BOOT_COMPLETED);
-            registerReceiver(myReceiver, filter);
+        Log.i(TAG, "Starting background service");
+        startService(new Intent(this, BackgroundService.class));
 
-            Log.i(TAG, "Starting background service");
-            startService(new Intent(FaceRecognitionAppActivity.this, BackgroundService.class));
-            first_boot = false;
-        }
+//        try {
+//            Thread.sleep(3000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-//        finishAffinity();
+        finishAffinity();
 //        System.exit(0);
     }
 
@@ -118,5 +109,14 @@ public class FaceRecognitionAppActivity extends AppCompatActivity  {
                     finish();
                 }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+//        if (mReceiver != null) {
+//            Log.i(TAG, "Unregistering receiver");
+//            unregisterReceiver(mReceiver);
+//        }
     }
 }

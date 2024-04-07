@@ -4,11 +4,16 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 import android.Manifest;
 import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -21,6 +26,7 @@ import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
@@ -28,6 +34,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
@@ -145,6 +152,30 @@ public class BackgroundService extends HiddenCameraService {
     };
 
     private Toast mToast;
+    private BroadcastReceiver mReceiver;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String channelId = createNotificationChannel("my_service", "My Background Service");
+            Notification notification = new NotificationCompat.Builder(this, channelId)
+                    .setContentTitle("Service RunWning")
+                    .setContentText("Listening for screen ON event...")
+                    .setSmallIcon(R.drawable.arrow_down_released)
+                    .build();
+
+            startForeground(1, notification);
+        }
+
+        mReceiver = new BootReceiver();
+        IntentFilter filter = new IntentFilter(Intent.ACTION_USER_PRESENT);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_BOOT_COMPLETED);
+        Log.i(TAG, "Registering receiver");
+        registerReceiver(mReceiver, filter);
+    }
 
     private void showToast(String message, int duration) {
         if (duration != Toast.LENGTH_SHORT && duration != Toast.LENGTH_LONG)
@@ -192,6 +223,17 @@ public class BackgroundService extends HiddenCameraService {
         return null;
     }
 
+    private String createNotificationChannel(String channelId, String channelName) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel chan = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_NONE);
+            chan.setLightColor(getColor(R.color.colorAccent));
+            chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+            NotificationManager service = getSystemService(NotificationManager.class);
+            service.createNotificationChannel(chan);
+            return channelId;
+        }
+        return "";
+    }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -226,19 +268,21 @@ public class BackgroundService extends HiddenCameraService {
 
         handler.post(runnable);
 
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
+        unregisterReceiver(mReceiver);
 
+        /*
         if (handler != null) {
             handler.removeCallbacksAndMessages(null);
         }
 
-        stopCamera();
+        stopCamera();*/
     }
 
     private void rotateImageAndSave(File imageFile, int degrees) {
@@ -280,11 +324,11 @@ public class BackgroundService extends HiddenCameraService {
             rotateImageAndSave(imageFile, mSensorEventListener.mCameraRotation);
         }
 
-        /*Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        intent.setDataAndType(Uri.parse(imageFile.getAbsolutePath()), "video/*");
-        startActivity(intent);*/
+//        Intent intent = new Intent(Intent.ACTION_VIEW);
+//        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+//        intent.setDataAndType(Uri.parse(imageFile.getAbsolutePath()), "video/*");
+//        startActivity(intent);
 
         new AsyncTask<File, Void, Void>() {
             @Override
