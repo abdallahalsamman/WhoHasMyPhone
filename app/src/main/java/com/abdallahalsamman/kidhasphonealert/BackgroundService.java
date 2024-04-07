@@ -341,7 +341,7 @@ public class BackgroundService extends HiddenCameraService {
                         int age = jsonObject.getInt("age");
                         String gender = jsonObject.getString("dominant_gender");
 
-                        if (age > 20 && gender.equals("Man")) {
+                        if ((gender.equals("Woman") && age > 30) || (gender.equals("Man") && age > 20)) {
                             lastParentDetection = System.currentTimeMillis();
                         } else {
                             reportKid("zainab");
