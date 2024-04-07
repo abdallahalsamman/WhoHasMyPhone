@@ -5,10 +5,15 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import android.Manifest;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.graphics.BitmapFactory;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -23,6 +28,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -40,6 +46,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -49,7 +57,7 @@ public class BackgroundService extends HiddenCameraService {
 
     private class sensorEventListener implements SensorEventListener {
 
-        public int mCameraRotation = CameraRotation.ROTATION_270;
+        public int mCameraRotation = 270;
 
         private void updateCameraRotation(int rotation) {
             mCameraRotation = rotation;
@@ -67,22 +75,22 @@ public class BackgroundService extends HiddenCameraService {
                     if (x > 0) {
                         // Landscape right
 //                        Log.i("BackgroundService", "Landscape right");
-                        updateCameraRotation(CameraRotation.ROTATION_90);
+                        updateCameraRotation(0);
                     } else {
                         // Landscape left
 //                        Log.i("BackgroundService", "Landscape left");
-                        updateCameraRotation(CameraRotation.ROTATION_0);
+                        updateCameraRotation(180);
                     }
                 } else {
                     // Device is in portrait mode
                     if (y > 0) {
                         // Normal portrait mode
 //                        Log.i("BackgroundService", "portrait mode");
-                        updateCameraRotation(CameraRotation.ROTATION_270);
+                        updateCameraRotation(270);
                     } else {
                         // Upside down portrait mode
 //                        Log.i("BackgroundService", "upsidedown mode");
-                        updateCameraRotation(CameraRotation.ROTATION_0);
+                        updateCameraRotation(90);
                     }
                 }
             }
@@ -162,17 +170,6 @@ public class BackgroundService extends HiddenCameraService {
             return;
         }
 
-        mCameraConfig = new CameraConfig()
-                .getBuilder(this)
-                .setCameraFacing(CameraFacing.FRONT_FACING_CAMERA)
-                .setCameraResolution(CameraResolution.LOW_RESOLUTION)
-                .setImageRotation(mSensorEventListener.mCameraRotation)
-                .setImageFormat(CameraImageFormat.FORMAT_JPEG)
-                .build();
-
-
-        startCamera(mCameraConfig);
-
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
@@ -204,19 +201,20 @@ public class BackgroundService extends HiddenCameraService {
         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_GRANTED) {
-
-            // use sensor to set rotation CameraRotation.ROTATION_0 CameraRotation.ROTATION_90 CameraRotation.ROTATION_270
-            // if the phone is held normally then use CameraRotation.ROTATION_270
-            // if the phone is held landscape left then use CameraRotation.ROTATION_90
-            // if the phone is held landscape right then use CameraRotation.ROTATION_90
-
-
-
             if (HiddenCameraUtils.canOverDrawOtherApps(this)) {
 
                 sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
                 accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
                 sensorManager.registerListener(mSensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+
+                mCameraConfig = new CameraConfig()
+                        .getBuilder(this)
+                        .setCameraFacing(CameraFacing.FRONT_FACING_CAMERA)
+                        .setCameraResolution(CameraResolution.LOW_RESOLUTION)
+                        .setImageFormat(CameraImageFormat.FORMAT_JPEG)
+                        .build();
+
+                startCamera(mCameraConfig);
 
                 handler.post(runnable);
             } else {
@@ -242,17 +240,48 @@ public class BackgroundService extends HiddenCameraService {
         stopCamera();
     }
 
+    private void rotateImageAndSave(File imageFile, int degrees) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        Bitmap originalBitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
+
+        if (originalBitmap != null) {
+            Matrix matrix = new Matrix();
+            matrix.postRotate(degrees);
+
+            Bitmap rotatedBitmap = Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight(), matrix, true);
+            // It's important to recycle the original bitmap only after we no longer need it
+            originalBitmap.recycle();
+
+            try (FileOutputStream out = new FileOutputStream(imageFile)) {
+                rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out); // Compress and save the rotated bitmap
+                Log.d(TAG, "Rotated image saved to: " + imageFile.getAbsolutePath());
+            } catch (IOException e) {
+                Log.e(TAG, "Failed to save rotated image", e);
+            } finally {
+                rotatedBitmap.recycle(); // Recycle the rotated bitmap to free up memory
+            }
+        } else {
+            Log.e(TAG, "Failed to decode the image file: " + imageFile.getAbsolutePath());
+        }
+    }
+
     @Override
     public void onImageCapture(@NonNull File imageFile) {
         Log.d(TAG, "Image captured saved at: " + imageFile.getAbsolutePath());
 
-        // open image file
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+        if (mSensorEventListener.mCameraRotation == 0) {
+            Log.d(TAG, "Image is already in correct orientation. No need to rotate.");
+        } else {
+            Log.d(TAG, "Rotating image by: " + mSensorEventListener.mCameraRotation + " degrees");
+            rotateImageAndSave(imageFile, mSensorEventListener.mCameraRotation);
+        }
+
+        /*Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.setDataAndType(Uri.parse(imageFile.getAbsolutePath()), "video/*");
-        startActivity(intent);
-
-
+        startActivity(intent);*/
 
         new AsyncTask<File, Void, Void>() {
             @Override
@@ -324,11 +353,6 @@ public class BackgroundService extends HiddenCameraService {
                 return null;
             }
         }.execute(imageFile);
-
-//        Intent intent = new Intent(Intent.ACTION_VIEW);
-//        intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
-//        intent.setDataAndType(Uri.parse(imageFile.getAbsolutePath()), "video/*");
-//        startActivity(intent);
     }
 
     private long lastParentDetection;

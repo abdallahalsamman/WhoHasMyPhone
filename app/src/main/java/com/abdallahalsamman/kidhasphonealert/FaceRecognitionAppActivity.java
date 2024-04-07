@@ -62,6 +62,8 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.androidhiddencamera.HiddenCameraUtils;
+
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -74,6 +76,7 @@ import java.util.Set;
 public class FaceRecognitionAppActivity extends AppCompatActivity  {
     private static final String TAG = "FaceRecognitionApp";
     private static final int PERMISSIONS_REQUEST_CODE = 0;
+    private boolean first_boot = true;
     private Toast mToast;
 
     private void showToast(String message, int duration) {
@@ -97,19 +100,40 @@ public class FaceRecognitionAppActivity extends AppCompatActivity  {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_CODE);
         }
 
+        if (!HiddenCameraUtils.canOverDrawOtherApps(this)) {
+            HiddenCameraUtils.openDrawOverPermissionSetting(this);
+        }
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         setContentView(R.layout.activity_face_recognition_app);
 
-        BootReceiver myReceiver = new BootReceiver();
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(Intent.ACTION_SCREEN_ON);
-        filter.addAction(Intent.ACTION_USER_PRESENT);
-        filter.addAction(Intent.ACTION_BOOT_COMPLETED);
-        registerReceiver(myReceiver, filter);
+        while (
+            ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+            !HiddenCameraUtils.canOverDrawOtherApps(this)
+        ) {
+            try {
+                Log.d(TAG, "Waiting for permissions...");
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
 
-        startService(new Intent(FaceRecognitionAppActivity.this, BackgroundService.class));
+
+        if (first_boot) {
+            BootReceiver myReceiver = new BootReceiver();
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_SCREEN_OFF);
+            filter.addAction(Intent.ACTION_SCREEN_ON);
+            filter.addAction(Intent.ACTION_USER_PRESENT);
+            filter.addAction(Intent.ACTION_BOOT_COMPLETED);
+            registerReceiver(myReceiver, filter);
+
+            startService(new Intent(FaceRecognitionAppActivity.this, BackgroundService.class));
+            first_boot = false;
+        }
 
 //        finishAffinity();
 //        System.exit(0);
