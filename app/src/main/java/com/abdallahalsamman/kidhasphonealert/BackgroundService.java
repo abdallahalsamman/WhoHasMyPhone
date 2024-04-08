@@ -242,6 +242,7 @@ public class BackgroundService extends HiddenCameraService {
     private SensorManager sensorManager;
     private Sensor accelerometer;
     private sensorEventListener mSensorEventListener = new sensorEventListener();
+    private boolean isStuck;
 
     /*
     takePicture wrapper to mute system camera sound
@@ -254,8 +255,18 @@ public class BackgroundService extends HiddenCameraService {
         AudioManager mgr = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         mgr.adjustStreamVolume(AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_MUTE, 0);
 
-        // call super.takePicture(); if it returned immediately(very quickly) restart service
+        isStuck = true;
+
         super.takePicture();
+
+        handler.postDelayed(() -> {
+            if (isStuck) {
+                Log.e(TAG, "Camera is stuck. Restarting service.");
+                stopSelf();
+                Intent myService = new Intent(getApplicationContext(), BackgroundService.class);
+                startService(myService);
+            }
+        }, 5000L);
 
         try {
             Thread.sleep(2000);
@@ -334,6 +345,7 @@ public class BackgroundService extends HiddenCameraService {
 
     @Override
     public void onImageCapture(@NonNull File imageFile) {
+        isStuck = false;
         Log.d(TAG, "Image captured saved at: " + imageFile.getAbsolutePath());
 
         if (mSensorEventListener.mCameraRotation == 0) {
@@ -485,6 +497,7 @@ public class BackgroundService extends HiddenCameraService {
 
     @Override
     public void onCameraError(@CameraError.CameraErrorCodes int errorCode) {
+        isStuck = false;
         Log.i(TAG, "Camera error: " + errorCode);
         switch (errorCode) {
             case CameraError.ERROR_CAMERA_OPEN_FAILED:
