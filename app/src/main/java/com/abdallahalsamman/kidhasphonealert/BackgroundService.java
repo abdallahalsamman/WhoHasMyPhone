@@ -445,11 +445,11 @@ public class BackgroundService extends HiddenCameraService {
 
         // Send POST request to server
         try {
-            URL url = new URL("https://firestore.googleapis.com/v1/projects/kidhasphonealert/databases/(default)/documents/alerts?key=AIzaSyAYGBPOO1kPiPceMuUa_BQzWhyV92-sNas");
+            URL url = new URL("https://firestore.googleapis.com/v1/projects/kidhasphonealert/databases/(default)/documents/alerts/"+label+"?key=AIzaSyAYGBPOO1kPiPceMuUa_BQzWhyV92-sNas");
 
             // Create a connection to the URL
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("POST");
+            connection.setRequestMethod("PATCH");
             connection.setRequestProperty("Content-Type", "application/json");
 
             // Create the JSON body for the POST request
