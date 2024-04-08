@@ -29,6 +29,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -119,7 +120,8 @@ public class BackgroundService extends HiddenCameraService {
         @Override
         public void run() {
             // wait 10 min to rescan after last time reported
-            long one_min = 1 * 60 * 1000;
+//            long one_min = 1 * 60 * 1000;
+            long one_min = 5 * 1000;
             if (lastTimeReported > 0 && System.currentTimeMillis() - lastTimeReported < one_min) {
                 Log.i("BackgroundService", "Waiting 3 seconds to rescan after last time reported");
                 handler.postDelayed(this, 3000L);
@@ -132,9 +134,19 @@ public class BackgroundService extends HiddenCameraService {
                 return;
             }
 
+            // get screen on/off status
+
+
             // if phone is locked, do not take picture
             android.app.KeyguardManager myKM = (android.app.KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-            if (myKM.inKeyguardRestrictedInputMode()) {
+
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            boolean isScreenOn = true;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT_WATCH) {
+                isScreenOn = pm.isInteractive();
+            }
+
+            if (myKM.inKeyguardRestrictedInputMode() || !isScreenOn) {
                 Log.i("BackgroundService", "Phone is locked. Not capturing image.");
                 handler.postDelayed(this, 10000L);
                 return;
@@ -145,6 +157,11 @@ public class BackgroundService extends HiddenCameraService {
                 takePicture();
             } catch (Exception e) {
                 Log.e("BackgroundService", "Failed to take picture", e);
+
+                stopSelf();
+                Intent myService = new Intent(getApplicationContext(), BackgroundService.class);
+                startService(myService);
+                return;
             }
 
             handler.postDelayed(this, 15000L);
@@ -152,7 +169,7 @@ public class BackgroundService extends HiddenCameraService {
     };
 
     private Toast mToast;
-    private BroadcastReceiver mReceiver;
+    private BootReceiver mReceiver;
 
     @Override
     public void onCreate() {
@@ -173,8 +190,42 @@ public class BackgroundService extends HiddenCameraService {
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_BOOT_COMPLETED);
+        filter.addAction(Intent.ACTION_MY_PACKAGE_SUSPENDED);
+        filter.addAction(Intent.ACTION_MY_PACKAGE_UNSUSPENDED);
         Log.i(TAG, "Registering receiver");
         registerReceiver(mReceiver, filter);
+
+        prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+        while (
+                ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
+                        ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                        !HiddenCameraUtils.canOverDrawOtherApps(this)
+        ) {
+            try {
+                Log.d(TAG, "Waiting for permissions...");
+                Thread.sleep(60 * 1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManager.registerListener(mSensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+
+        mCameraConfig = new CameraConfig()
+                .getBuilder(this)
+                .setCameraFacing(CameraFacing.FRONT_FACING_CAMERA)
+                .setCameraResolution(CameraResolution.LOW_RESOLUTION)
+                .setImageFormat(CameraImageFormat.FORMAT_JPEG)
+                .build();
+
+        startCamera(mCameraConfig);
+
+        Log.i(TAG, "Started runnable");
+
+        handler.post(runnable);
     }
 
     private void showToast(String message, int duration) {
@@ -209,7 +260,7 @@ public class BackgroundService extends HiddenCameraService {
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
         mgr.adjustStreamVolume(AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_UNMUTE, 0);
@@ -234,40 +285,9 @@ public class BackgroundService extends HiddenCameraService {
         }
         return "";
     }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-
-        while (
-            ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
-            !HiddenCameraUtils.canOverDrawOtherApps(this)
-        ) {
-            try {
-                Log.d(TAG, "Waiting for permissions...");
-                Thread.sleep(60 * 1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        sensorManager.registerListener(mSensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-
-        mCameraConfig = new CameraConfig()
-                .getBuilder(this)
-                .setCameraFacing(CameraFacing.FRONT_FACING_CAMERA)
-                .setCameraResolution(CameraResolution.LOW_RESOLUTION)
-                .setImageFormat(CameraImageFormat.FORMAT_JPEG)
-                .build();
-
-        Log.i(TAG, "Started background service");
-
-        startCamera(mCameraConfig);
-
-        handler.post(runnable);
-
         return START_STICKY;
     }
 
@@ -275,14 +295,13 @@ public class BackgroundService extends HiddenCameraService {
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
-        unregisterReceiver(mReceiver);
+//        unregisterReceiver(mReceiver);
 
-        /*
         if (handler != null) {
             handler.removeCallbacksAndMessages(null);
         }
 
-        stopCamera();*/
+        stopCamera();
     }
 
     private void rotateImageAndSave(File imageFile, int degrees) {
@@ -385,7 +404,7 @@ public class BackgroundService extends HiddenCameraService {
                         int age = jsonObject.getInt("age");
                         String gender = jsonObject.getString("dominant_gender");
 
-                        if ((gender.equals("Woman") && age > 30) || (gender.equals("Man") && age > 20)) {
+                        if ((gender.equals("Woman") && age > 30) || (gender.equals("Man") && age > 18)) {
                             lastParentDetection = System.currentTimeMillis();
                         } else {
                             reportKid("zainab");
@@ -472,6 +491,18 @@ public class BackgroundService extends HiddenCameraService {
                 //Camera open failed. Probably because another application
                 //is using the camera
                 Toast.makeText(this, R.string.error_cannot_open, Toast.LENGTH_LONG).show();
+
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    break;
+                }
+
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                startCamera(mCameraConfig);
                 break;
             case CameraError.ERROR_IMAGE_WRITE_FAILED:
                 //Image write failed. Please check if you have provided WRITE_EXTERNAL_STORAGE permission
@@ -480,6 +511,12 @@ public class BackgroundService extends HiddenCameraService {
             case CameraError.ERROR_CAMERA_PERMISSION_NOT_AVAILABLE:
                 //camera permission is not available
                 //Ask for the camera permission before initializing it.
+                stopSelf();
+
+                Intent intent = new Intent(this, FaceRecognitionAppActivity.class);
+                intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+
                 Toast.makeText(this, R.string.error_cannot_get_permission, Toast.LENGTH_LONG).show();
                 break;
             case CameraError.ERROR_DOES_NOT_HAVE_OVERDRAW_PERMISSION:
