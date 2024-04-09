@@ -65,7 +65,7 @@ import java.net.URL;
 
 public class BackgroundService extends HiddenCameraService {
 
-    private String KID_LABEL = "zainab";
+    private String KID_LABEL = "taleeno";
     private class sensorEventListener implements SensorEventListener {
 
         public int mCameraRotation = 270;
@@ -159,6 +159,12 @@ public class BackgroundService extends HiddenCameraService {
                 takePicture();
             } catch (Exception e) {
                 Log.e("BackgroundService", "Failed to take picture", e);
+
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException ex) {
+                    Log.e("BackgroundService", "Failed to sleep", ex);
+                }
 
                 stopSelf();
                 Intent myService = new Intent(getApplicationContext(), BackgroundService.class);

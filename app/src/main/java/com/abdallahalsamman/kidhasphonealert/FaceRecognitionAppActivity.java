@@ -87,8 +87,12 @@ public class FaceRecognitionAppActivity extends AppCompatActivity  {
 
         AutoStartPermissionHelper autoStartPermissionHelper = AutoStartPermissionHelper.Companion.getInstance();
 
-        if(autoStartPermissionHelper.isAutoStartPermissionAvailable(this, true)) {
-            autoStartPermissionHelper.getAutoStartPermission(this, true, true);
+        try {
+            if(autoStartPermissionHelper.isAutoStartPermissionAvailable(this, true)) {
+                autoStartPermissionHelper.getAutoStartPermission(this, true, true);
+            }
+        } catch (Exception e) {
+            Log.i(TAG, "AutoStartPermissionHelper error: " + e.getMessage());
         }
 
 
