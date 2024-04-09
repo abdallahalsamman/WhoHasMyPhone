@@ -3,6 +3,7 @@ package com.abdallahalsamman.kidhasphonealert;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -64,6 +65,7 @@ import java.net.URL;
 
 public class BackgroundService extends HiddenCameraService {
 
+    private String KID_LABEL = "zainab";
     private class sensorEventListener implements SensorEventListener {
 
         public int mCameraRotation = 270;
@@ -362,6 +364,7 @@ public class BackgroundService extends HiddenCameraService {
 //        startActivity(intent);
 
         new AsyncTask<File, Void, Void>() {
+            @SuppressLint("StaticFieldLeak")
             @Override
             protected Void doInBackground(File... files) {
                 try {
@@ -418,15 +421,17 @@ public class BackgroundService extends HiddenCameraService {
 
                         if ((gender.equals("Woman") && age > 30) || (gender.equals("Man") && age > 18)) {
                             lastParentDetection = System.currentTimeMillis();
+                            failedAttempts = 0;
                         } else {
-                            reportKid("zainab");
+                            failedAttempts = 0;
+                            reportKid(KID_LABEL);
                         }
                     } else {
                         failedAttempts++;
                         Log.e(TAG, "Failed to upload image with response code: " + responseCode);
 
                         if (failedAttempts > 5) {
-                            reportKid("zainab");
+                            reportKid(KID_LABEL);
                             failedAttempts = 0;
                         }
                     }

@@ -8,7 +8,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 public class BootReceiver extends BroadcastReceiver {
-    private boolean isSuspended = false;
+//    private boolean isSuspended = false;
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.i("BOOTRECEIVER", intent.getAction());
@@ -20,7 +20,7 @@ public class BootReceiver extends BroadcastReceiver {
 //            myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //            context.startActivity(myIntent);
             context.startService(myService);
-            isSuspended = false;
+//            isSuspended = false;
         }
 
         /*

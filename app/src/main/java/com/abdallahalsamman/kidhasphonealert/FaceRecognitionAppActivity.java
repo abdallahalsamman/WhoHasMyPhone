@@ -34,6 +34,7 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.androidhiddencamera.HiddenCameraUtils;
+import com.judemanutd.autostarter.AutoStartPermissionHelper;
 
 public class FaceRecognitionAppActivity extends AppCompatActivity  {
     private static final String TAG = "FaceRecognitionApp";
@@ -82,6 +83,12 @@ public class FaceRecognitionAppActivity extends AppCompatActivity  {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+
+        AutoStartPermissionHelper autoStartPermissionHelper = AutoStartPermissionHelper.Companion.getInstance();
+
+        if(autoStartPermissionHelper.isAutoStartPermissionAvailable(this, true)) {
+            autoStartPermissionHelper.getAutoStartPermission(this, true, true);
         }
 
 
